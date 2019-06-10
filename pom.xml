@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.github.hoteam</groupId>
+        <artifactId>hoteam.engine</artifactId>
+        <version>1.1.1-RELEASE</version>
+    </parent>
+    <groupId>com.hoteam.github</groupId>
+    <artifactId>hoteam.sms</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.github.hoteam</groupId>
+            <artifactId>hoteam.engine.common</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>ch.ethz.ganymed</groupId>
+                    <artifactId>ganymed-ssh2</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>verax</groupId>
+                    <artifactId>vxIPMI</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.0.0-M1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <encoding>${file_encoding}</encoding>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
