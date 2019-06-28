@@ -1,7 +1,7 @@
 package com.hoteam.sms.driver.domain.response;
 
 
-import com.hoteam.sms.driver.utils.MessageTool;
+import com.hoteam.sms.driver.util.MessageTool;
 import org.apache.commons.lang3.ArrayUtils;
 
 
@@ -11,22 +11,16 @@ import org.apache.commons.lang3.ArrayUtils;
  */
 public class CmppSubmitResp {
 
-    private long msgId;
+    private int sequenceId;
 
     private int state;
 
-    private long msgId2;
+    private long msgId;
 
     public CmppSubmitResp(byte[] bytes) {
-        System.out.println("提交结果消息字节长度：" + bytes.length);
-        for (int i : bytes) {
-            System.out.print(i);
-            System.out.print(" ");
-        }
-        System.out.println();
-        this.msgId = MessageTool.bytesToInt(ArrayUtils.subarray(bytes, 8, 12));
-        this.msgId2 = MessageTool.bytesToLong(ArrayUtils.subarray(bytes, 12, 20));
-        this.msgId2 = Math.abs(this.msgId2);
+        this.sequenceId = MessageTool.bytesToInt(ArrayUtils.subarray(bytes, 8, 12));
+        this.msgId = MessageTool.bytesToLong(ArrayUtils.subarray(bytes, 12, 20));
+        this.msgId = Math.abs(this.msgId);
         this.state = bytes[20];
     }
 
@@ -34,22 +28,20 @@ public class CmppSubmitResp {
         return state;
     }
 
-    public long getMsgId2() {
-        return msgId2;
+    public int getSequenceId() {
+        return sequenceId;
     }
 
     public long getMsgId() {
-
         return msgId;
     }
 
     @Override
     public String toString() {
         return "CmppSubmitResp{" +
-                "msgId=" + msgId +
+                "sequenceId=" + sequenceId +
                 ", state=" + state +
-                ", msgId2=" + msgId2 +
+                ", msgId=" + msgId +
                 '}';
     }
-
 }

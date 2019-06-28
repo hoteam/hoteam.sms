@@ -1,8 +1,8 @@
 package com.hoteam.sms.driver;
 
 import com.hoteam.msre.common.model.Result;
+import com.hoteam.sms.driver.util.SmsResult;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -20,16 +20,7 @@ public interface SmsDriver {
      * @param content 短信内容
      * @return
      */
-    Result send(Optional<String> mobile, String content);
-
-    /**
-     * 给指定列表的手机号码发送短信
-     *
-     * @param mobiles
-     * @param content
-     * @return
-     */
-    Result sends(Optional<List<String>> mobiles, String content);
+    SmsResult send(Optional<String> mobile, String content);
 
     Result close();
 }

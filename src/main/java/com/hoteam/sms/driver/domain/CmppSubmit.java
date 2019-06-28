@@ -1,11 +1,11 @@
 package com.hoteam.sms.driver.domain;
 
 import com.hoteam.sms.driver.core.Command;
-import com.hoteam.sms.driver.utils.MessageTool;
+import com.hoteam.sms.driver.util.MessageTool;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-
-import java.io.UnsupportedEncodingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author weixiang
@@ -13,27 +13,35 @@ import java.io.UnsupportedEncodingException;
  */
 public class CmppSubmit extends CmppMessageHeader {
 
-    int msgId = 0;
+    private static final Logger logger = LoggerFactory.getLogger(CmppSubmit.class);
 
-    byte pkTotal = 0;
+    int msgId;
 
-    byte pkNumber = 0;
+    byte pkTotal;
+
+    byte pkNumber;
 
     byte registeredDelivery = 1;
 
     byte msgLevel = 0;
 
-    String serviceId;// 10位长度
+    /**
+     * 10位长度
+     */
+    String serviceId;
 
-    byte feeUserType = 3;
+    byte feeUserType = 2;
 
-    String feeTerminalId;// 21位长度
+    /**
+     * 21位长度
+     */
+    String feeTerminalId;
 
     byte feeTerminalType = 0;
 
     byte tp_pid = 0;
 
-    byte tp_udhi = 0;
+    byte tp_udhi;
 
     /**
      * 0：ASCII串
@@ -44,42 +52,65 @@ public class CmppSubmit extends CmppMessageHeader {
      */
     byte msgFmt = 8;
 
-    String msgSrc;// 6位长度
-
+    /**
+     * 6位长度
+     */
+    String msgSrc;
     /**
      * 02：对“计费用户号码”按条计信息费
      * 03：对“计费用户号码”按包月收取信息费
      * 04：对“计费用户号码”的信息费封顶
      * 05：对“计费用户号码”的收费是由SP实现
+     * 2位长度
      */
-    String feeType;// 2位长度
+    String feeType;
 
-    String feeCode;// 6位长度
+    /**
+     * 6位长度
+     */
+    String feeCode;
+    /**
+     * 17位长度
+     */
+    String vaildTime = "";
+    /**
+     * 17位长度
+     */
+    String atTime = "";
 
-    String vaildTime = "";// 17位长度
-
-    String atTime = "";// 17位长度
-
-    String srcId;// 21位长度
-
+    /**
+     * 21位长度
+     */
+    String srcId;
     byte destUsrTl = 1;
 
-    String destTerminalId;// 21位长度
+    /**
+     * 21位长度
+     */
+    String destTerminalId;
 
     byte destTerminalType = 0;
 
-    byte msgLength; // 1位长度
+    byte msgLength;
+    /**
+     * 消息总长度
+     */
+    int totalLength;
 
     byte[] msgContent;
 
-    String linkId = "";// 保留字
+    /**
+     * 保留字
+     */
+    String linkId = "";
 
     private int terminalIdLen;
     private int linkIdLen;
     private int submitExpMsgLen;
 
-    public CmppSubmit(byte version, String serviceId, String srcId, int SequenceId, String mobile, String content) {
-        super(Command.CMPP_SUBMIT, version);
+    public CmppSubmit(byte version, String serviceId, String srcId, int sequenceId, String mobile, byte[]
+            content, boolean large, int pkTotal, int pkNumber, int totalLength) {
+        super(Command.CMPP_SUBMIT, version, sequenceId);
         if (version == Command.CMPP2_VERSION) {
             terminalIdLen = 21;
             linkIdLen = 8;
@@ -89,7 +120,15 @@ public class CmppSubmit extends CmppMessageHeader {
             linkIdLen = 20;
             submitExpMsgLen = Command.CMPP3_SUBMIT_LEN_EXPMSGLEN;
         }
-
+        if (large) {
+            this.tp_udhi = 1;
+            this.pkNumber = (byte) pkNumber;
+            this.pkTotal = (byte) pkTotal;
+        } else {
+            this.tp_udhi = 0;
+            this.pkNumber = 1;
+            this.pkTotal = 1;
+        }
         this.serviceId = serviceId;
         this.feeTerminalId = "";
         this.feeType = "02";
@@ -97,51 +136,46 @@ public class CmppSubmit extends CmppMessageHeader {
         this.srcId = srcId + "1630";
         this.msgFmt = (byte) 8;
         this.linkId = "";
-        try {
-            msgContent = content.getBytes("UTF-16BE");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        this.msgId = SequenceId;
-        this.sequenceId = this.msgId;
         this.destTerminalId = mobile;
+        //这个设置无用
+        this.msgId = sequenceId;
+        this.sequenceId = sequenceId;
+        this.msgContent = content;
+        this.totalLength = totalLength;
+        this.msgLength = (byte) content.length;
     }
-
 
     @Override
     public byte[] toByteArray() {
-
-        ByteBuf buf = Unpooled.buffer(130 + 8 + ((byte) 1) * 21 + msgContent.length);
-        buf.writeInt(130 + 8 + ((byte) 1) * 21 + msgContent.length);
-        buf.writeInt(commandId);
-        buf.writeInt(msgId);
-
-        buf.writeLong(0);
-        buf.writeByte(0);
-        buf.writeByte(0);
-        buf.writeByte(1);
-        buf.writeByte(0);
-        buf.writeBytes(MessageTool.getLenBytes(serviceId, 10));
-        buf.writeByte((byte) 2);
-        buf.writeBytes(MessageTool.getLenBytes("", 21));
-        buf.writeByte(0);
-        buf.writeByte(0);
-        buf.writeByte(8);
-
-        buf.writeBytes(MessageTool.getLenBytes(serviceId, 6));
-        buf.writeBytes(MessageTool.getLenBytes(feeType, 2));
-        buf.writeBytes(MessageTool.getLenBytes(feeCode, 6));
-        buf.writeBytes(MessageTool.getLenBytes(vaildTime, 17));
-        buf.writeBytes(MessageTool.getLenBytes(atTime, 17));
-        buf.writeBytes(MessageTool.getLenBytes(srcId, 21));
-        buf.writeByte((byte) 1);
-        buf.writeBytes(MessageTool.getLenBytes(destTerminalId, 21));
-        buf.writeByte(msgContent.length);
-        buf.writeBytes(msgContent);
-        buf.writeLong((long) 0);
-
-        return buf.array();
+        //创建指定长度的buffer
+        ByteBuf buffer = Unpooled.buffer(138 + ((byte) 1) * 21 + msgContent.length);
+        //写入消息头:total_length,command_id,sequence_id
+        buffer.writeInt(138 + ((byte) 1) * 21 + msgContent.length);
+        buffer.writeInt(commandId);
+        buffer.writeInt(this.sequenceId);
+        //写入消息体
+        buffer.writeLong(0);
+        buffer.writeByte(this.pkTotal);
+        buffer.writeByte(this.pkNumber);
+        buffer.writeByte(this.registeredDelivery);
+        buffer.writeByte(this.msgLevel);
+        buffer.writeBytes(MessageTool.getLenBytes(serviceId, 10));
+        buffer.writeByte(this.feeUserType);
+        buffer.writeBytes(MessageTool.getLenBytes(this.feeTerminalId, 21));
+        buffer.writeByte(this.tp_pid);
+        buffer.writeByte(this.tp_udhi);
+        buffer.writeByte(this.msgFmt);
+        buffer.writeBytes(MessageTool.getLenBytes(serviceId, 6));
+        buffer.writeBytes(MessageTool.getLenBytes(feeType, 2));
+        buffer.writeBytes(MessageTool.getLenBytes(feeCode, 6));
+        buffer.writeBytes(MessageTool.getLenBytes(vaildTime, 17));
+        buffer.writeBytes(MessageTool.getLenBytes(atTime, 17));
+        buffer.writeBytes(MessageTool.getLenBytes(srcId, 21));
+        buffer.writeByte((byte) 1);
+        buffer.writeBytes(MessageTool.getLenBytes(destTerminalId, 21));
+        buffer.writeByte(msgContent.length);
+        buffer.writeBytes(msgContent);
+        buffer.writeLong((long) 0);
+        return buffer.array();
     }
-
-
 }

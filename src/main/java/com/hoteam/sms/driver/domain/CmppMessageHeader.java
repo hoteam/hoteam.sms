@@ -29,9 +29,10 @@ public abstract class CmppMessageHeader implements Serializable {
     protected byte version;
 
 
-    protected CmppMessageHeader(int commandId, byte version) {
+    protected CmppMessageHeader(int commandId, byte version, int sequenceId) {
         this.commandId = commandId;
         this.version = version;
+        this.sequenceId = sequenceId;
     }
 
     /**
@@ -41,5 +42,8 @@ public abstract class CmppMessageHeader implements Serializable {
      */
     public abstract byte[] toByteArray();
 
+    public int getSequenceId() {
+        return sequenceId;
+    }
 }
 

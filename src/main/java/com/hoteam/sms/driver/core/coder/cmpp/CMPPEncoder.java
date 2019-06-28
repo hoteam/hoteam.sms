@@ -8,32 +8,33 @@ import io.netty.handler.codec.MessageToByteEncoder;
 
 /**
  * 编码
+ *
  * @author weixiang
  * @date 2018/8/2 15:37
  */
 public class CMPPEncoder extends MessageToByteEncoder<Object> {
 
-    public CMPPEncoder(){
+    public CMPPEncoder() {
         super(false);
     }
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
-        if (msg instanceof byte[]){
-            out.writeBytes((byte[])msg);
-        }else if(msg instanceof Integer){
-            out.writeInt((Integer)msg);
-        }else if(msg instanceof Byte){
-            out.writeByte((Byte)msg);
-        }else if(msg instanceof Long){
-            out.writeLong((Long)msg);
-        }else if(msg instanceof String){
-            out.writeBytes(((String)msg).getBytes("UTF-16BE"));
-        }else if (msg instanceof Character){
-            out.writeChar((Character)msg);
-        }else if (msg instanceof CmppMessageHeader){
-            CmppMessageHeader c=(CmppMessageHeader)msg;
-            out.writeBytes(c.toByteArray());
+    protected void encode(ChannelHandlerContext context, Object message, ByteBuf out) throws Exception {
+        if (message instanceof byte[]) {
+            out.writeBytes((byte[]) message);
+        } else if (message instanceof Integer) {
+            out.writeInt((Integer) message);
+        } else if (message instanceof Byte) {
+            out.writeByte((Byte) message);
+        } else if (message instanceof Long) {
+            out.writeLong((Long) message);
+        } else if (message instanceof String) {
+            out.writeBytes(((String) message).getBytes("UTF-16BE"));
+        } else if (message instanceof Character) {
+            out.writeChar((Character) message);
+        } else if (message instanceof CmppMessageHeader) {
+            CmppMessageHeader header = (CmppMessageHeader) message;
+            out.writeBytes(header.toByteArray());
         }
     }
 }

@@ -39,7 +39,9 @@ public class HeartHandler extends ChannelInboundHandlerAdapter {
             IdleState state = event.state();
             if (state == IdleState.WRITER_IDLE || state == IdleState.ALL_IDLE) {
                 client.submit(new CmppActiveTest());
-                logger.info("heartbeat from sp to gateway start !!!");
+                if (logger.isDebugEnabled()) {
+                    logger.info("send heartbeat to sms gateway ...");
+                }
             }
         } else {
             super.userEventTriggered(ctx, evt);

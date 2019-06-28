@@ -1,7 +1,7 @@
 package com.hoteam.sms.driver.domain.response;
 
-import com.hoteam.sms.driver.core.Command;
 import com.hoteam.sms.driver.domain.CmppMessageHeader;
+import com.hoteam.sms.driver.core.Command;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
@@ -11,7 +11,7 @@ import io.netty.buffer.Unpooled;
  */
 public class CmppActiveTestResp extends CmppMessageHeader {
     public CmppActiveTestResp() {
-        super(Command.CMPP_ACTIVE_TEST_RESP, Command.CMPP2_VERSION);
+        super(Command.CMPP_ACTIVE_TEST_RESP, Command.CMPP2_VERSION,0);
     }
 
     /**
@@ -21,7 +21,7 @@ public class CmppActiveTestResp extends CmppMessageHeader {
      */
     @Override
     public byte[] toByteArray() {
-        ByteBuf buf = Unpooled.buffer(4 + 4 + 4 + 1);
+        ByteBuf buf= Unpooled.buffer(4 + 4 + 4 + 1);
         buf.writeInt(4 + 4 + 4 + 1);
         buf.writeInt(Command.CMPP_ACTIVE_TEST_RESP);
         buf.writeInt(0);

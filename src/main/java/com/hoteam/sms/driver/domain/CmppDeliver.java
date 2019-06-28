@@ -1,8 +1,7 @@
 package com.hoteam.sms.driver.domain;
 
 
-
-import com.hoteam.sms.driver.utils.MessageTool;
+import com.hoteam.sms.driver.util.MessageTool;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -15,7 +14,7 @@ import java.io.UnsupportedEncodingException;
  */
 public class CmppDeliver {
 
-    private byte[] Msg_Id=new byte[8];
+    private byte[] Msg_Id = new byte[8];
     private String Dest_Id;// 21 目的号码 String
     private String Service_Id;// 10 业务标识 String
     private byte TP_pid = 0;
@@ -36,7 +35,7 @@ public class CmppDeliver {
     private String Submit_time;
     private String Done_time;
     private String Dest_terminal_Id;
-    private int SMSC_sequence;
+    private int sequenceId;
 
     private int result;// 解析结果
 
@@ -47,7 +46,7 @@ public class CmppDeliver {
      */
     public CmppDeliver(byte[] data) {
 
-        System.arraycopy(data, 12, data, 0, data.length-12);
+        System.arraycopy(data, 12, data, 0, data.length - 12);
 
         ByteArrayInputStream bais = null;
         DataInputStream dis = null;
@@ -84,12 +83,12 @@ public class CmppDeliver {
                     byte[] Msg_Id_DELIVRD_B = new byte[8];
                     disd.read(Msg_Id_DELIVRD_B);
                     this.Msg_Id_DELIVRD = MessageTool.bytesToLong(Msg_Id_DELIVRD_B);
-                    this.Msg_Id_DELIVRD=Math.abs(this.Msg_Id_DELIVRD);
+                    this.Msg_Id_DELIVRD = Math.abs(this.Msg_Id_DELIVRD);
                     this.Stat = MessageTool.readString(disd, 7, this.Msg_Fmt == 8 ? "UTF-16BE" : "gb2312");
                     this.Submit_time = MessageTool.readString(disd, 10, this.Msg_Fmt == 8 ? "UTF-16BE" : "gb2312");
                     this.Done_time = MessageTool.readString(disd, 10, this.Msg_Fmt == 8 ? "UTF-16BE" : "gb2312");
                     this.Dest_terminal_Id = MessageTool.readString(disd, 21, this.Msg_Fmt == 8 ? "UTF-16BE" : "gb2312");
-                    this.SMSC_sequence = disd.readInt();
+                    this.sequenceId = disd.readInt();
                     disd.close();
                     baisd.close();
                     this.result = 0;
@@ -230,11 +229,8 @@ public class CmppDeliver {
         return Dest_terminal_Id;
     }
 
-    /**
-     * @return sMSC_sequence
-     */
-    public int getSMSC_sequence() {
-        return SMSC_sequence;
+    public int getSequenceId() {
+        return sequenceId;
     }
 
     /**
@@ -245,144 +241,119 @@ public class CmppDeliver {
     }
 
     /**
-     * @param msg_Id
-     *            要设置的 msg_Id
+     * @param msg_Id 要设置的 msg_Id
      */
     public void setMsg_Id(byte[] msg_Id) {
         Msg_Id = msg_Id;
     }
 
     /**
-     * @param dest_Id
-     *            要设置的 dest_Id
+     * @param dest_Id 要设置的 dest_Id
      */
     public void setDest_Id(String dest_Id) {
         Dest_Id = dest_Id;
     }
 
     /**
-     * @param service_Id
-     *            要设置的 service_Id
+     * @param service_Id 要设置的 service_Id
      */
     public void setService_Id(String service_Id) {
         Service_Id = service_Id;
     }
 
     /**
-     * @param tP_pid
-     *            要设置的 tP_pid
+     * @param tP_pid 要设置的 tP_pid
      */
     public void setTP_pid(byte tP_pid) {
         TP_pid = tP_pid;
     }
 
     /**
-     * @param tP_udhi
-     *            要设置的 tP_udhi
+     * @param tP_udhi 要设置的 tP_udhi
      */
     public void setTP_udhi(byte tP_udhi) {
         TP_udhi = tP_udhi;
     }
 
     /**
-     * @param msg_Fmt
-     *            要设置的 msg_Fmt
+     * @param msg_Fmt 要设置的 msg_Fmt
      */
     public void setMsg_Fmt(byte msg_Fmt) {
         Msg_Fmt = msg_Fmt;
     }
 
     /**
-     * @param src_terminal_Id
-     *            要设置的 src_terminal_Id
+     * @param src_terminal_Id 要设置的 src_terminal_Id
      */
     public void setSrc_terminal_Id(String src_terminal_Id) {
         Src_terminal_Id = src_terminal_Id;
     }
 
     /**
-     * @param registered_Delivery
-     *            要设置的 registered_Delivery
+     * @param registered_Delivery 要设置的 registered_Delivery
      */
     public void setRegistered_Delivery(byte registered_Delivery) {
         Registered_Delivery = registered_Delivery;
     }
 
     /**
-     * @param msg_Length
-     *            要设置的 msg_Length
+     * @param msg_Length 要设置的 msg_Length
      */
     public void setMsg_Length(byte msg_Length) {
         this.msg_Length = msg_Length;
     }
 
     /**
-     * @param msg_Content
-     *            要设置的 msg_Content
+     * @param msg_Content 要设置的 msg_Content
      */
     public void setMsg_Content(String msg_Content) {
         this.msg_Content = msg_Content;
     }
 
     /**
-     * @param reserved
-     *            要设置的 reserved
+     * @param reserved 要设置的 reserved
      */
     public void setReserved(String reserved) {
         Reserved = reserved;
     }
 
     /**
-     * @param msg_Id_DELIVRD
-     *            要设置的 msg_Id_DELIVRD
+     * @param msg_Id_DELIVRD 要设置的 msg_Id_DELIVRD
      */
     public void setMsg_Id_DELIVRD(int msg_Id_DELIVRD) {
         Msg_Id_DELIVRD = msg_Id_DELIVRD;
     }
 
     /**
-     * @param stat
-     *            要设置的 stat
+     * @param stat 要设置的 stat
      */
     public void setStat(String stat) {
         Stat = stat;
     }
 
     /**
-     * @param submit_time
-     *            要设置的 submit_time
+     * @param submit_time 要设置的 submit_time
      */
     public void setSubmit_time(String submit_time) {
         Submit_time = submit_time;
     }
 
     /**
-     * @param done_time
-     *            要设置的 done_time
+     * @param done_time 要设置的 done_time
      */
     public void setDone_time(String done_time) {
         Done_time = done_time;
     }
 
     /**
-     * @param dest_terminal_Id
-     *            要设置的 dest_terminal_Id
+     * @param dest_terminal_Id 要设置的 dest_terminal_Id
      */
     public void setDest_terminal_Id(String dest_terminal_Id) {
         Dest_terminal_Id = dest_terminal_Id;
     }
 
     /**
-     * @param sMSC_sequence
-     *            要设置的 sMSC_sequence
-     */
-    public void setSMSC_sequence(int sMSC_sequence) {
-        SMSC_sequence = sMSC_sequence;
-    }
-
-    /**
-     * @param result
-     *            要设置的 result
+     * @param result 要设置的 result
      */
     public void setResult(int result) {
         this.result = result;

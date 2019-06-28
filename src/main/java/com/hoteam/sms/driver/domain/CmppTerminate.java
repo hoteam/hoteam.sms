@@ -1,7 +1,7 @@
 package com.hoteam.sms.driver.domain;
 
 import com.hoteam.sms.driver.core.Command;
-import com.hoteam.sms.driver.utils.MessageTool;
+import com.hoteam.sms.driver.util.MessageTool;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
@@ -16,8 +16,8 @@ public class CmppTerminate extends CmppMessageHeader {
 
     private String pwd;
 
-    public CmppTerminate(String serviceId, String pwd) {
-        super(Command.CMPP_TERMINATE, Command.CMPP2_VERSION);
+    public CmppTerminate(String serviceId, String pwd,int sequenceId) {
+        super(Command.CMPP_TERMINATE, Command.CMPP2_VERSION,sequenceId);
         this.serviceId = serviceId;
         this.pwd = pwd;
     }

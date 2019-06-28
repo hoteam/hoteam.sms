@@ -1,6 +1,6 @@
 package com.hoteam.sms.driver.domain.response;
 
-import com.hoteam.sms.driver.utils.MessageTool;
+import com.hoteam.sms.driver.util.MessageTool;
 import org.apache.commons.lang3.ArrayUtils;
 
 /**

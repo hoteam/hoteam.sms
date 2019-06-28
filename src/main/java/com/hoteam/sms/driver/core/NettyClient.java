@@ -1,5 +1,7 @@
 package com.hoteam.sms.driver.core;
 
+import com.hoteam.sms.driver.config.CmppConfig;
+import com.hoteam.sms.driver.core.coder.cmpp.CMPPCallback;
 import com.hoteam.sms.driver.domain.CmppConnect;
 import com.hoteam.sms.driver.domain.CmppMessageHeader;
 import com.hoteam.sms.driver.domain.CmppTerminate;
@@ -29,11 +31,14 @@ public class NettyClient {
     private String serviceId;
     private String password;
 
-    public NettyClient(String host, int port, String serviceId, String password) {
-        this.host = host;
-        this.port = port;
-        this.serviceId = serviceId;
-        this.password = password;
+    private CMPPCallback callback;
+
+    public NettyClient(CmppConfig config, CMPPCallback callback) {
+        this.host = config.getHost();
+        this.port = config.getPort();
+        this.serviceId = config.getUser();
+        this.password = config.getPasd();
+        this.callback = callback;
     }
 
     /**
@@ -124,7 +129,7 @@ public class NettyClient {
                 //设置日志
                 .handler(new LoggingHandler(LogLevel.INFO))
                 //重写通道初始化方法
-                .handler(new NettyClientInitializer(this));
+                .handler(new NettyClientInitializer(this, callback));
 
         ChannelFuture channelFuture = bootstrap.connect().sync();
         channel = channelFuture.channel();
@@ -140,7 +145,7 @@ public class NettyClient {
     public void terminate() {
 
         if (channel.isActive()) {
-            CmppMessageHeader cmppTerminate = new CmppTerminate(serviceId, password);
+            CmppMessageHeader cmppTerminate = new CmppTerminate(serviceId, password,0);
             channel.writeAndFlush(cmppTerminate);
             channel.close();
             channel.disconnect();

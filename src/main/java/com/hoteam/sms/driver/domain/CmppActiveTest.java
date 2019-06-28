@@ -12,7 +12,7 @@ import io.netty.buffer.Unpooled;
 public class CmppActiveTest extends CmppMessageHeader {
 
     public CmppActiveTest() {
-        super(Command.CMPP_ACTIVE_TEST, Command.CMPP2_VERSION);
+        super(Command.CMPP_ACTIVE_TEST, Command.CMPP2_VERSION,0);
     }
 
     /**

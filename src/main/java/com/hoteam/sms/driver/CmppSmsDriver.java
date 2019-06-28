@@ -2,11 +2,13 @@ package com.hoteam.sms.driver;
 
 import com.hoteam.msre.common.model.Result;
 import com.hoteam.sms.driver.config.CmppConfig;
-import com.hoteam.sms.driver.core.Command;
+import com.hoteam.sms.driver.core.MessageBuilder;
 import com.hoteam.sms.driver.core.NettyClient;
-import com.hoteam.sms.driver.domain.CmppMessageHeader;
+import com.hoteam.sms.driver.core.SmsCache;
+import com.hoteam.sms.driver.core.coder.cmpp.CMPPCallback;
 import com.hoteam.sms.driver.domain.CmppSubmit;
-import com.hoteam.sms.driver.utils.MessageTool;
+import com.hoteam.sms.driver.util.Sms;
+import com.hoteam.sms.driver.util.SmsResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,49 +23,40 @@ import java.util.Optional;
  */
 public class CmppSmsDriver implements SmsDriver {
     private final static Logger logger = LoggerFactory.getLogger(CmppSmsDriver.class);
+    private final static Integer MAX_CACHE_SIZE = 1024 * 1024;
+    private final static String PREFIX = "86";
     private CmppConfig config;
-
     private NettyClient client;
+    private MessageBuilder builder;
 
     @Override
-    public Result send(Optional<String> mobile, String content) {
+    public SmsResult send(Optional<String> mobile, String content) {
+        if (SmsCache.instance().size() > MAX_CACHE_SIZE) {
+            logger.error("sms cache is too large !!! system will reset the sms cache!!");
+            SmsCache.instance().reset();
+        }
         if (mobile.isPresent()) {
-            boolean success = this.client.submit(buildMessage(mobile.get(), content));
+            String targetMobile;
+            if (mobile.get().startsWith(PREFIX)) {
+                targetMobile = mobile.get();
+            } else {
+                targetMobile = PREFIX + mobile.get();
+            }
+            List<CmppSubmit> messages = builder.build(targetMobile, content);
+            Sms sms = new Sms((long) messages.get(0).getSequenceId(), targetMobile, content);
+            boolean success = this.send(messages);
             if (success) {
-                logger.info("sms send to ismg success!!");
-                return Result.SUCCESS("sms submit to ismg success!");
+                logger.info("send sms to gateway success");
+                SmsCache.instance().put(Optional.of(sms));
+                return new SmsResult(true, "send sms to gateway success", sms);
             } else {
-                logger.error("sms does not send to ismg!!!");
-                return Result.FAILED("sms send to ismg error!");
+                logger.error("send sms to gateway failed");
+                return new SmsResult(false, "send sms to gateway failed !!!", sms);
             }
         } else {
-            return Result.FAILED("mobile is empty!!!");
+            logger.error("sms target mobile is empty!!!");
+            return new SmsResult(false, "sms target mobile is empty!!!", null);
         }
-    }
-
-    @Override
-    public Result sends(Optional<List<String>> mobiles, String content) {
-        int failed = 0;
-        Result result;
-        if (mobiles.isPresent() && mobiles.get().size() > 0) {
-            for (String mobile : mobiles.get()) {
-                result = send(Optional.of(mobile), content);
-                if (result.isFailed()) {
-                    failed++;
-                }
-            }
-            if (failed == 0) {
-                logger.info("batch sms send success!!");
-                return Result.SUCCESS("batch sms send success!!");
-            } else {
-                logger.error("batch send sms does not full success with failed number:{}", failed);
-                return Result.FAILED("batch send sms does not full success with failed number:" + failed);
-            }
-        } else {
-            logger.warn("mobile is null or empty!!!");
-            return Result.FAILED("mobile is null or empty");
-        }
-
     }
 
     @Override
@@ -80,19 +73,22 @@ public class CmppSmsDriver implements SmsDriver {
      *
      * @param config
      */
-    public CmppSmsDriver(CmppConfig config) {
+    public CmppSmsDriver(CmppConfig config, CMPPCallback callback) {
         this.config = config;
-        this.client = new NettyClient(config.getHost(), config.getPort(), config.getUser(), config.getPasd());
+        this.client = new NettyClient(config, callback);
         this.client.start();
+        this.builder = new MessageBuilder(config.getUser(), config.getCode());
     }
 
-    private CmppMessageHeader buildMessage(String mobile, String content) {
-        int sequenceId = MessageTool.getSequence();
-        return new CmppSubmit(Command.CMPP2_VERSION, this.config.getUser(), this.config.getCode(), sequenceId, mobile,
-                content);
-    }
-
-    public CmppConfig getConfig() {
-        return config;
+    private boolean send(List<CmppSubmit> messages) {
+        int success = 0;
+        for (CmppSubmit submit : messages) {
+            if (this.client.submit(submit)) {
+                success++;
+            } else {
+                logger.error("message[{}] send failed!", submit.getSequenceId());
+            }
+        }
+        return success == messages.size();
     }
 }
